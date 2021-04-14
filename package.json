@@ -1,0 +1,30 @@
+{
+  "name": "zoomer",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Zoom Bardaciokas",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./index.js",
+    "s": "nodemon ./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/irgipaulius/zoomer.git"
+  },
+  "author": "Paulius Jacinkevičius",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/irgipaulius/zoomer/issues"
+  },
+  "homepage": "https://github.com/irgipaulius/zoomer#readme",
+  "dependencies": {
+    "dayjs": "^1.10.4",
+    "dotenv": "^8.2.0",
+    "jsonwebtoken": "^8.3.0",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
