@@ -10,7 +10,7 @@ export async function zoomFetcher(url, body) {
   const token = jwt.sign(
     {
       iss: process.env.ZOOM_API_KEY,
-      exp: dayjs().add(2, "second").toDate().getTime(),
+      exp: dayjs().add(1, "second").toDate().getTime(),
     },
     process.env.ZOOM_API_SECRET
   );

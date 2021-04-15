@@ -1,14 +1,14 @@
 import { zoomFetcher } from "./getFetchOptions.js";
 
 export async function getUserId() {
-  const userEmail = process.env.ZOOM_ACCOUNT_EMAIL || undefined;
+  if (process.env.ZOOM_USER_ID) {
+    return process.env.ZOOM_USER_ID;
+  }
 
   const response = await zoomFetcher(`/users`);
 
-  // if ZOOM_ACCOUNT_EMAIL is not set, then select the first user.
-  const user = response.users.find(({ email }) =>
-    userEmail ? userEmail === email : true
-  );
+  // select first found user. I don't like using [0]
+  const user = response.users.find(() => true);
 
   return user.id;
 }
