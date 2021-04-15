@@ -1,5 +1,7 @@
-import { zoomFetcher } from "./getFetchOptions.js";
 import dayjs from "dayjs";
+import { alreadyDownloaded } from "../database/recordingsListClient.js";
+
+import { zoomFetcher } from "./getFetchOptions.js";
 
 function getRecording(recordings) {
   const selectRecording = (type) =>
@@ -33,20 +35,19 @@ export async function getRecordings(userId) {
 
   const recordings = response.meetings
     .map((meeting) => {
-      if (meeting.duration < 5) {
+      if (meeting.duration < 5 || alreadyDownloaded(meeting.id)) {
         return undefined;
       }
 
       const recording = getRecording(meeting.recording_files);
-      console.log(meeting.id + "   " + recording);
-
       const topic = `${meeting.topic}`;
-      const ts = dayjs(meeting.start_time).format("YYYY-MM-DD HH:mm");
+      const date = dayjs(meeting.start_time).format("YYYY-MM-DD HH:mm");
 
       if (recording) {
         return {
+          id: meeting.id,
           topic,
-          ts,
+          date,
           recording,
         };
       }
@@ -56,13 +57,3 @@ export async function getRecordings(userId) {
 
   return recordings;
 }
-
-// const response = await zoomFetcher(`/users/${userId}/meetings`);
-
-// const rrr = [];
-
-// const r = await Promise.all(
-//   response.meetings.map(({ id }) =>
-//     zoomFetcher(`/meetings/${id}/recordings`)
-//   )
-// );
