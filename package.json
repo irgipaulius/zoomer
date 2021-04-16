@@ -22,9 +22,12 @@
     "dayjs": "^1.10.4",
     "dotenv": "^8.2.0",
     "fs": "0.0.1-security",
+    "got": "^11.8.2",
     "jsonwebtoken": "^8.3.0",
     "node-fetch": "^2.6.1",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "stream": "0.0.2",
+    "util": "^0.12.3"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"

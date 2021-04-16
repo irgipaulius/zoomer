@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { alreadyDownloaded } from "../database/recordingsListClient.js";
+import { isAlreadyDownloaded } from "../database/recordingsListClient.js";
 
 import { zoomFetcher } from "./getFetchOptions.js";
 
@@ -35,13 +35,13 @@ export async function getRecordings(userId) {
 
   const recordings = response.meetings
     .map((meeting) => {
-      if (meeting.duration < 5 || alreadyDownloaded(meeting.id)) {
+      if (meeting.duration < 5 || isAlreadyDownloaded(meeting.id)) {
         return undefined;
       }
 
       const recording = getRecording(meeting.recording_files);
       const topic = `${meeting.topic}`;
-      const date = dayjs(meeting.start_time).format("YYYY-MM-DD HH:mm");
+      const date = dayjs(meeting.start_time).format("YYYY-MM-DD");
 
       if (recording) {
         return {
