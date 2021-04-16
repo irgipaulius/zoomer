@@ -21,14 +21,13 @@ async function download() {
 
     startDownloading(meeting.recording.download_url, filename);
 
-    false &&
-      setDownloaded({
-        id: meeting.id,
-        ts: new Date().toLocaleString(),
-        date: meeting.date,
-        topic: meeting.topic,
-        url: meeting.recording.download_url,
-      });
+    setDownloaded({
+      id: meeting.id,
+      ts: new Date().toLocaleString(),
+      date: meeting.date,
+      topic: meeting.topic,
+      url: meeting.recording.download_url,
+    });
   });
 }
 
