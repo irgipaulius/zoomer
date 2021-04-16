@@ -24,7 +24,6 @@ export function isAlreadyDownloaded(id) {
 
 export function setDownloaded(recording) {
   const list = getList();
-  console.log(list);
   const newListString = JSON.stringify([...list, recording], undefined, " ");
   writeFileSync(dbFilepath, newListString, { encoding: "utf8" });
 }
