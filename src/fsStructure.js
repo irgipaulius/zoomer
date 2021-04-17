@@ -39,9 +39,17 @@ export function constructFilename(topic, date, recording, offset = 0) {
 }
 
 export function getDestinationPath() {
-  const destination = path.resolve(process.env.DESTINATION) || undefined;
-  if (!destination) {
-    throw Error("no DESTINATION env found");
+  try {
+    return path.resolve(process.env.DESTINATION);
+  } catch (e) {
+    throw new Error("no DESTINATION env found");
   }
-  return destination;
+}
+
+export function getProjectPath() {
+  try {
+    return path.resolve(process.env.LOCATION);
+  } catch (e) {
+    throw new Error("no LOCATION env found");
+  }
 }

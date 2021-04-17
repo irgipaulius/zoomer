@@ -1,13 +1,12 @@
 import { readFileSync, writeFileSync } from "fs";
 import path from "path";
+import { getProjectPath } from "../src/fsStructure.js";
 
-const dbFilepath = path.resolve(
-  path.dirname(""),
-  "./database/recordingsList.json"
-);
+const dbFilepath = () =>
+  path.resolve(getProjectPath(), "./database/recordingsList.json");
 
 const getList = () => {
-  const content = readFileSync(dbFilepath, { encoding: "utf8" });
+  const content = readFileSync(dbFilepath(), { encoding: "utf8" });
   if (content) {
     const parsed = JSON.parse(content);
     if (Array.isArray(parsed)) {
@@ -25,5 +24,5 @@ export function isAlreadyDownloaded(id) {
 export function setDownloaded(recording) {
   const list = getList();
   const newListString = JSON.stringify([...list, recording], undefined, " ");
-  writeFileSync(dbFilepath, newListString, { encoding: "utf8" });
+  writeFileSync(dbFilepath(), newListString, { encoding: "utf8" });
 }
