@@ -45,7 +45,7 @@ export async function getRecordings(userId) {
 
       if (recording) {
         return {
-          id: meeting.id,
+          id: recording.id,
           topic,
           date,
           recording,
