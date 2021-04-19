@@ -35,17 +35,17 @@ export async function getRecordings(userId) {
 
   const recordings = response.meetings
     .map((meeting) => {
-      if (meeting.duration < 5 || isAlreadyDownloaded(meeting.id)) {
-        return undefined;
-      }
-
       const recording = getRecording(meeting.recording_files);
-      const topic = `${meeting.topic}`;
-      const date = dayjs(meeting.start_time).format("YYYY-MM-DD");
-
       if (recording) {
+        if (meeting.duration < 5 || isAlreadyDownloaded(recording.id)) {
+          return undefined;
+        }
+
+        const topic = `${meeting.topic}`;
+        const date = dayjs(meeting.start_time).format("YYYY-MM-DD");
+
         return {
-          id: meeting.id,
+          id: recording.id,
           topic,
           date,
           recording,
