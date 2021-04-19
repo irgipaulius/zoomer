@@ -22,7 +22,7 @@ async function download() {
     startDownloading(meeting.recording.download_url, filename);
 
     setDownloaded({
-      id: meeting.id,
+      id: meeting.recording.id,
       ts: new Date().toLocaleString(),
       date: meeting.date,
       topic: meeting.topic,
