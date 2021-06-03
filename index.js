@@ -12,6 +12,8 @@ async function download() {
   const userId = await getUserId();
   const meetings = await getRecordings(userId);
 
+  console.debug(meetings)
+
   meetings.map((meeting) => {
     const filename = constructFilename(
       meeting.topic,

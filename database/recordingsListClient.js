@@ -2,6 +2,8 @@ import { readFileSync, writeFileSync } from "fs";
 import path from "path";
 import { getProjectPath } from "../src/fsStructure.js";
 
+// random comment
+
 const dbFilepath = () =>
   path.resolve(getProjectPath(), "./database/recordingsList.json");
 
