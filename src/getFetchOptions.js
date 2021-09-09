@@ -2,17 +2,19 @@ import fetch from "node-fetch";
 import dayjs from "dayjs";
 import jwt from "jsonwebtoken";
 
+import config from "../config.js"
+
 export async function zoomFetcher(url, body) {
-  if (!process.env.ZOOM_API_KEY || !process.env.ZOOM_API_SECRET) {
+  if (!config.ZOOM_API_KEY || !config.ZOOM_API_SECRET) {
     throw new Error("No auth credentials set!");
   }
 
   const token = jwt.sign(
     {
-      iss: process.env.ZOOM_API_KEY,
+      iss: config.ZOOM_API_KEY,
       exp: dayjs().add(1, "second").toDate().getTime(),
     },
-    process.env.ZOOM_API_SECRET
+    config.ZOOM_API_SECRET
   );
 
   const search = `${new URLSearchParams(body)}`;

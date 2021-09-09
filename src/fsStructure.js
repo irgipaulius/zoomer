@@ -1,6 +1,8 @@
 import path from "path";
 import { readdirSync, existsSync, mkdirSync } from "fs";
 
+import config from "../config.js"
+
 const lessonTemplate = (date, topic, postfix) => `${date} ${topic} ${postfix}`;
 
 const filenameTemplate = (date, postfix, extention) =>
@@ -40,7 +42,7 @@ export function constructFilename(topic, date, recording, offset = 0) {
 
 export function getDestinationPath() {
   try {
-    return path.resolve(process.env.DESTINATION);
+    return path.resolve(config.DESTINATION);
   } catch (e) {
     throw new Error("no DESTINATION env found");
   }
@@ -48,7 +50,7 @@ export function getDestinationPath() {
 
 export function getProjectPath() {
   try {
-    return path.resolve(process.env.LOCATION);
+    return path.resolve(config.LOCATION);
   } catch (e) {
     throw new Error("no LOCATION env found");
   }

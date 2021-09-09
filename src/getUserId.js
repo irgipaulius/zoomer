@@ -1,8 +1,9 @@
 import { zoomFetcher } from "./getFetchOptions.js";
+import config from "../config.js"
 
 export async function getUserId() {
-  if (process.env.ZOOM_USER_ID) {
-    return process.env.ZOOM_USER_ID;
+  if (config.ZOOM_USER_ID) {
+    return config.ZOOM_USER_ID;
   }
 
   const response = await zoomFetcher(`/users`);
