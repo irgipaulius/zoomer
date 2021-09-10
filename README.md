@@ -5,29 +5,24 @@ Input your credentials in config.js, setup crontab, and it will download zoom re
 
 Idempotent - meaning it does not download the same recording twice.
 
-### File destination location:
-
-> `DESTINATION`/`topic`/`date topic postfix`/`date_zoom_postfix.extention`
-
-### install:
+## Install:
 
 ```console
+cd /root    # or wherever you like
 git clone https://github.com/irgipaulius/zoomer.git
 cd zoomer
 npm install
 
-edit config.js # insert configuration
+# setup configuration
+edit config.js 
 npm start
-```
 
-### crontab hint:
-
-```cron
+# start cron
+crontab -e
 */5 * * * * /usr/local/bin/node /root/zoomer/index.js
 ```
 
-### manual trigger
+## File destination location:
 
-```console
-npm run start
-```
+> `DESTINATION`/`topic`/`date topic postfix`/`date_zoom_postfix.extention`
+
