@@ -32,12 +32,11 @@ function getRecording(recordings) {
 
 export async function getRecordings(userId) {
   const response = await zoomFetcher(`/users/${userId}/recordings`);
-
   const recordings = response.meetings
-    .map((meeting) => {
+  .map((meeting) => {
       const recording = getRecording(meeting.recording_files);
       if (recording) {
-        if (meeting.duration < 5 || isAlreadyDownloaded(recording.id)) {
+        if (isAlreadyDownloaded(recording.id)) {
           return undefined;
         }
 
