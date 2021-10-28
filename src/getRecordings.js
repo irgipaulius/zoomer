@@ -33,19 +33,18 @@ function getRecording(recordings) {
 export async function getRecordings(userId) {
   const response = await zoomFetcher(`/users/${userId}/recordings`);
   const recordings = response.meetings
-  .map((meeting) => {
+    .map((meeting) => {
       const recording = getRecording(meeting.recording_files);
       if (recording) {
         if (isAlreadyDownloaded(recording.id)) {
           return undefined;
         }
 
-        const topic = `${meeting.topic}`;
         const date = dayjs(meeting.start_time).format("YYYY-MM-DD");
 
         return {
           id: recording.id,
-          topic,
+          topic: `${meeting.topic}`.trim(),
           date,
           recording,
         };
