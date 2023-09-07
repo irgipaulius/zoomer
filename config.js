@@ -1,7 +1,8 @@
 export default {
-    "ZOOM_API_KEY": "",
-    "ZOOM_API_SECRET": "",
-    "ZOOM_USER_ID": "",
+    "ZOOM_S2S_ACC_ID": "",
+    "ZOOM_S2S_CLIENT_ID": "",
+    "ZOOM_S2S_SECRET": "",
+    
     "DESTINATION": "",
     "LOCATION": ""
 }
