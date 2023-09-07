@@ -9,8 +9,8 @@ import { constructFilename } from "./src/fsStructure.js";
 dotenv.config();
 
 async function download() {
-  const userId = await getUserId();
-  const meetings = await getRecordings(userId);
+  //const userId = await getUserId();
+  const meetings = await getRecordings();
 
   meetings.map((meeting) => {
     const filename = constructFilename(

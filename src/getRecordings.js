@@ -30,8 +30,8 @@ function getRecording(recordings) {
   return undefined;
 }
 
-export async function getRecordings(userId) {
-  const response = await zoomFetcher(`/users/${userId}/recordings`);
+export async function getRecordings() {
+  const response = await zoomFetcher(`/users/me/recordings`);
   const recordings = response.meetings
     .map((meeting) => {
       const recording = getRecording(meeting.recording_files);
