@@ -24,7 +24,8 @@ export function ownOutputPattern(pathTemplate) {
  */
 export function createSkipCheck(cfg) {
   const t = cfg.transcription;
-  const patterns = [ownOutputPattern(t.pathTemplate), ...(t.skipIfExists || [])];
+  const own = [t.pathTemplate, t.sharedFolderPathTemplate].filter(Boolean).map(ownOutputPattern);
+  const patterns = [...own, ...(t.skipIfExists || [])];
   let listCache = { mtimeMs: -1, paths: [] };
 
   function listed() {

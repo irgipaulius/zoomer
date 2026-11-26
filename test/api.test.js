@@ -133,3 +133,20 @@ test("api: claim hands out nothing when the skip list cannot be read", async () 
     s.close();
   }
 });
+
+test("api: results never overwrite a file the job did not write", async () => {
+  const s = await setup();
+  try {
+    const job = (await s.post("/jobs/claim", { worker_id: "w1" })).body;
+    const base = s.file.replace(/\.mp4$/, "");
+    fs.writeFileSync(`${base}.m1.txt`, "someone else's"); // appears mid-job
+    const r1 = await s.post("/jobs/r1/results", { lease_id: job.lease_id, model: "m1", text: "ours" });
+    assert.strictEqual(fs.readFileSync(`${base}.m1.txt`, "utf8"), "someone else's");
+    assert.ok(r1.body.files.includes(`${base}.m1.1.txt`));
+    await s.post("/jobs/r1/results", { lease_id: job.lease_id, model: "m1", text: "ours again" });
+    assert.strictEqual(fs.readFileSync(`${base}.m1.1.txt`, "utf8"), "ours again", "re-posting replaces only our own file");
+    assert.ok(!fs.existsSync(`${base}.m1.2.txt`));
+  } finally {
+    s.close();
+  }
+});

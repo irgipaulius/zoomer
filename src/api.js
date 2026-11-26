@@ -3,10 +3,17 @@ import path from "path";
 import crypto from "crypto";
 import express from "express";
 import writeFileAtomic from "write-file-atomic";
-import { transcriptPath } from "./paths.js";
+import { transcriptPath, freePath } from "./paths.js";
 import { createSkipCheck } from "./skip.js";
 
 export const PROTOCOL_VERSION = 1;
+
+/** The file this job already wrote for target: target itself or a "stem.N.ext" variant of it. */
+function ownVariant(mine, target) {
+  const ext = path.extname(target);
+  const stem = target.slice(0, target.length - ext.length);
+  return [...mine].find((f) => f === target || (f.startsWith(`${stem}.`) && f.endsWith(ext) && /^\d+$/.test(f.slice(stem.length + 1, f.length - ext.length))));
+}
 
 /** Worker pull API (docs/WORKER_PROTOCOL.md). Transcription state lives on each recording. */
 export function createApi({ cfg, db, log, now = Date.now, skip = createSkipCheck(cfg) }) {
@@ -111,9 +118,11 @@ export function createApi({ cfg, db, log, now = Date.now, skip = createSkipCheck
     const content = { txt: body.text, srt: body.srt, vtt: body.vtt, json: JSON.stringify(body, undefined, " ") };
     const job = rec.transcription;
     const files = [];
+    const mine = new Set(job.files);
     for (const format of t.formats) {
       if (content[format] == null) continue;
-      const file = transcriptPath(cfg, rec, body.model, format, body.language);
+      const target = transcriptPath(cfg, rec, body.model, format, body.language);
+      const file = ownVariant(mine, target) || freePath(target); // only ever replace our own file
       fs.mkdirSync(path.dirname(file), { recursive: true });
       writeFileAtomic.sync(file, content[format]);
       files.push(file);

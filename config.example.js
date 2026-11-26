@@ -67,14 +67,19 @@ export default {
     formats: ["txt", "srt", "vtt", "json"],
     maxAttempts: 3,
     leaseSeconds: 600, // worker must heartbeat within this
-    // Where results go. Placeholders: {dir} {base} (recording file name without
-    // extension) {model} {format} {language}
+    // Where results go. Placeholders: {dir} {name} (recording file name) {base}
+    // (name without extension) {model} {format} {language}. Existing files are never
+    // overwritten: a free name like "x.1.txt" is used instead.
     pathTemplate: "{dir}/{base}.{model}.{format}",
+    // Used instead when the recording's folder holds other media files too (see
+    // mediaExtensions), e.g. "{dir}/{name}.{model}.{format}". Empty = always pathTemplate.
+    sharedFolderPathTemplate: "",
+    mediaExtensions: ["mp4", "m4a", "mp3", "wav", "wma", "ogg", "oga", "opus", "flac", "aac", "amr", "webm", "mkv", "mov", "avi", "3gp"],
 
     // Never transcribe a recording twice. A recording is skipped (when it would be queued,
     // and again when a worker claims it) if any of these exist. Paths are relative to the
     // recording's folder unless absolute; placeholders {dir} {name} {base}; * ? [] wildcards
-    // in the last segment. Files matching pathTemplate always count.
+    // in the last segment. Files matching pathTemplate (or sharedFolderPathTemplate) always count.
     skipIfExists: [],
     // Optional text file of paths (one per line, # comments) to leave alone, e.g. recordings
     // another tool transcribes. A recording at or under a listed path is skipped.
