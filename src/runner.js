@@ -5,9 +5,10 @@ import pRetry from "p-retry";
 import { recordingPath } from "./paths.js";
 import { downloadFile } from "./download.js";
 import { newTranscription } from "./store.js";
+import { createSkipCheck } from "./skip.js";
 
 /** One scheduled pass = list Zoom, queue new recordings, download what is pending. */
-export function createRunner({ cfg, db, zoom, log, download = downloadFile, now = Date.now }) {
+export function createRunner({ cfg, db, zoom, log, download = downloadFile, now = Date.now, skip = createSkipCheck(cfg) }) {
   const d = cfg.download;
   const queue = new (pQueue.default || pQueue)({ concurrency: d.concurrency });
   const inFlight = new Set();
@@ -26,6 +27,22 @@ export function createRunner({ cfg, db, zoom, log, download = downloadFile, now 
     log.info(`zoom: ${found.length} recordings listed, ${fresh.length} new`);
   }
 
+  function queueTranscription(rec) {
+    let why;
+    try {
+      why = skip(rec.path);
+    } catch (e) {
+      why = `skip check failed: ${e.message}`; // never risk transcribing twice
+    }
+    if (why) {
+      rec.transcription = { status: "skipped", reason: why };
+      log.info(`not transcribing ${rec.id}: ${why}`);
+    } else {
+      rec.transcription = newTranscription();
+      log.info(`queued transcription for ${rec.id}`);
+    }
+  }
+
   async function downloadOne(rec) {
     const attempt = () =>
       zoom.getToken().then((token) =>
@@ -42,10 +59,7 @@ export function createRunner({ cfg, db, zoom, log, download = downloadFile, now 
       });
       Object.assign(rec, { status: "done", error: null, doneAt: iso() });
       log.info(`downloaded ${rec.id}: ${rec.bytes} bytes -> ${rec.path}`);
-      if (cfg.transcription.enabled) {
-        rec.transcription = newTranscription();
-        log.info(`queued transcription for ${rec.id}`);
-      }
+      if (cfg.transcription.enabled) queueTranscription(rec);
     } catch (e) {
       rec.attempts++;
       rec.error = e.message;

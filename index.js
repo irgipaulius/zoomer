@@ -39,7 +39,7 @@ function status(db) {
   for (const r of recs) {
     const tr = r.transcription;
     if (r.status !== "done") console.log(`- download ${r.status} ${r.id} "${r.topic}" attempts ${r.attempts}${r.error ? ` | ${r.error}` : ""}`);
-    if (tr && tr.status !== "done") console.log(`- transcription ${tr.status} ${r.id} "${r.topic}" attempts ${tr.attempts}${tr.error ? ` | ${tr.error}` : ""}`);
+    if (tr && tr.status !== "done" && tr.status !== "skipped") console.log(`- transcription ${tr.status} ${r.id} "${r.topic}" attempts ${tr.attempts}${tr.error ? ` | ${tr.error}` : ""}`);
   }
 }
 

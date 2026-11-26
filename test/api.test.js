@@ -110,3 +110,26 @@ test("api: fail is retried when retryable, final when not; language filter", asy
     s.close();
   }
 });
+
+test("api: claim skips a job whose transcript appeared after it was queued", async () => {
+  const s = await setup({ skipIfExists: ["transcription_*.txt"] });
+  try {
+    fs.writeFileSync(path.join(path.dirname(s.file), "transcription_other.txt"), "made by another tool");
+    const res = await s.call("POST", "/jobs/claim", { worker_id: "w1" });
+    assert.strictEqual(res.statusCode, 204);
+    assert.strictEqual(s.db.get("r1").transcription.status, "skipped");
+  } finally {
+    s.close();
+  }
+});
+
+test("api: claim hands out nothing when the skip list cannot be read", async () => {
+  const s = await setup({ skipListFile: "/nonexistent/list.txt" });
+  try {
+    const res = await s.call("POST", "/jobs/claim", { worker_id: "w1" });
+    assert.strictEqual(res.statusCode, 503);
+    assert.strictEqual(s.db.get("r1").transcription.status, "pending");
+  } finally {
+    s.close();
+  }
+});

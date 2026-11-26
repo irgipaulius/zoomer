@@ -4,11 +4,12 @@ import crypto from "crypto";
 import express from "express";
 import writeFileAtomic from "write-file-atomic";
 import { transcriptPath } from "./paths.js";
+import { createSkipCheck } from "./skip.js";
 
 export const PROTOCOL_VERSION = 1;
 
 /** Worker pull API (docs/WORKER_PROTOCOL.md). Transcription state lives on each recording. */
-export function createApi({ cfg, db, log, now = Date.now }) {
+export function createApi({ cfg, db, log, now = Date.now, skip = createSkipCheck(cfg) }) {
   const t = cfg.transcription;
   const a = cfg.api;
   const iso = (ms) => new Date(ms).toISOString();
@@ -48,7 +49,24 @@ export function createApi({ cfg, db, log, now = Date.now }) {
     const { worker_id: workerId, types = ["transcribe"], capabilities = {} } = req.body || {};
     expireLeases();
     const langs = capabilities.languages;
-    const rec = types.includes("transcribe") && jobs("pending").find(() => !t.language || !langs || langs.includes(t.language));
+    const fits = () => types.includes("transcribe") && (!t.language || !langs || langs.includes(t.language));
+    let rec = null;
+    for (const r of fits() ? jobs("pending") : []) {
+      let why;
+      try {
+        why = skip(r.path, r.transcription.files || []); // a transcript may have appeared since it was queued
+      } catch (e) {
+        log.error(`skip check failed, not handing out jobs: ${e.message}`);
+        return res.status(503).json({ error: "skip check failed" });
+      }
+      if (!why) {
+        rec = r;
+        break;
+      }
+      Object.assign(r.transcription, { status: "skipped", reason: why });
+      log.info(`transcription ${r.id} skipped: ${why}`);
+      db.save();
+    }
     if (!rec) return res.status(204).end();
     const job = rec.transcription;
     Object.assign(job, { status: "leased", attempts: job.attempts + 1, leaseId: crypto.randomUUID(), leaseExpiresAt: iso(now() + t.leaseSeconds * 1000), workerId });

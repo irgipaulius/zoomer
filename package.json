@@ -25,6 +25,7 @@
     "got": "^11.8.2",
     "p-queue": "^6.6.2",
     "p-retry": "^4.6.2",
+    "picomatch": "^2.3.2",
     "proper-lockfile": "^4.1.2",
     "write-file-atomic": "^3.0.3"
   },

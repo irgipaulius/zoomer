@@ -70,6 +70,16 @@ export default {
     // Where results go. Placeholders: {dir} {base} (recording file name without
     // extension) {model} {format} {language}
     pathTemplate: "{dir}/{base}.{model}.{format}",
+
+    // Never transcribe a recording twice. A recording is skipped (when it would be queued,
+    // and again when a worker claims it) if any of these exist. Paths are relative to the
+    // recording's folder unless absolute; placeholders {dir} {name} {base}; * ? [] wildcards
+    // in the last segment. Files matching pathTemplate always count.
+    skipIfExists: [],
+    // Optional text file of paths (one per line, # comments) to leave alone, e.g. recordings
+    // another tool transcribes. A recording at or under a listed path is skipped.
+    // Relative lines are relative to the file's folder.
+    skipListFile: "",
   },
 
   // Worker HTTP API (pull-only; Zoomer never calls workers). Put HTTPS in front.
