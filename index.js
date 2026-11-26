@@ -9,12 +9,16 @@ import { openDb, initDb } from "./src/store.js";
 import { createZoomClient } from "./src/zoom.js";
 import { createRunner } from "./src/runner.js";
 import { createApi } from "./src/api.js";
+import { findBacklog, queueBacklog } from "./src/backlog.js";
 
 const USAGE = `usage: node index.js [command] [--once]
   run [--once]   (default) run on the configured schedule; --once = one pass, then exit (for system cron)
   status         show downloads and transcriptions that are not done
   retry <id>     re-queue a failed download or transcription (stop the running instance first)
-  init           create an empty database (fresh installs only)`;
+  init           create an empty database (fresh installs only)
+  transcribe-backlog [--limit N] [--dry-run] [--verbose]
+                 queue transcription for recordings that have none yet (newest first, default
+                 limit 10); --dry-run only lists them, --verbose also lists what is skipped and why`;
 
 const projectDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -43,6 +47,19 @@ function status(db) {
   }
 }
 
+function backlog(cfg, db, argv, dryRun) {
+  const i = argv.indexOf("--limit");
+  const limit = i >= 0 ? Number(argv[i + 1]) : 10;
+  if (!(limit >= 0)) throw new Error("--limit needs a number");
+  const { candidates, skipped } = findBacklog({ cfg, db });
+  const pick = candidates.slice(0, limit);
+  const mb = (n) => `${(n / 1e6).toFixed(0)} MB`;
+  if (argv.includes("--verbose")) for (const s of skipped) console.log(`skip  ${s.path}\n      ${s.reason}`);
+  for (const c of pick) console.log(`${dryRun ? "would queue" : "queued"}  ${new Date(c.mtimeMs).toISOString().slice(0, 10)}  ${mb(c.size)}  ${c.path}`);
+  if (!dryRun) queueBacklog({ db, items: pick });
+  console.log(`${candidates.length} untranscribed, ${skipped.length} skipped (already transcribed or listed); ${dryRun ? "would queue" : "queued"} ${pick.length}`);
+}
+
 async function main(argv) {
   const cmd = argv.find((a) => !a.startsWith("--")) || "run";
   const cfg = await loadConfig(projectDir);
@@ -50,12 +67,14 @@ async function main(argv) {
 
   if (cmd === "init") return initDb(cfg.db.path) && console.log(`created ${cfg.db.path}`);
   if (cmd === "status") return status(openDb(cfg.db.path));
-  if (cmd !== "run" && cmd !== "retry") return console.error(USAGE), (process.exitCode = 2);
+  if (cmd === "transcribe-backlog" && argv.includes("--dry-run")) return backlog(cfg, openDb(cfg.db.path), argv, true);
+  if (!["run", "retry", "transcribe-backlog"].includes(cmd)) return console.error(USAGE), (process.exitCode = 2);
+  if (cmd === "transcribe-backlog" && !cfg.transcription.enabled) throw new Error("transcription.enabled is off");
 
   if (cmd === "run") assertRunnable(cfg);
   const release = lock(cfg, log);
   if (!release) {
-    if (cmd === "retry") throw new Error("zoomer is running; stop it first");
+    if (cmd !== "run") throw new Error("zoomer is running; stop it first");
     return log.info("another zoomer instance is running; exiting");
   }
   const db = openDb(cfg.db.path);
@@ -68,6 +87,11 @@ async function main(argv) {
     db.save();
     release();
     return console.log(`re-queued ${rec.id}`);
+  }
+
+  if (cmd === "transcribe-backlog") {
+    backlog(cfg, db, argv, false);
+    return release();
   }
 
   const runner = createRunner({ cfg, db, zoom: createZoomClient(cfg.zoom), log });

@@ -85,6 +85,17 @@ export default {
     // another tool transcribes. A recording at or under a listed path is skipped.
     // Relative lines are relative to the file's folder.
     skipListFile: "",
+
+    // "node index.js transcribe-backlog" also queues media already on disk: it scans these
+    // folders (empty = download.dir) for files with mediaExtensions, filtered by globs
+    // relative to the scanned folder.
+    backlog: {
+      dirs: [],
+      include: ["**"],
+      exclude: [],
+      minBytes: 1000000, // ignore smaller files
+      order: "newest", // newest | oldest (file modification time)
+    },
   },
 
   // Worker HTTP API (pull-only; Zoomer never calls workers). Put HTTPS in front.

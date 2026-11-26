@@ -50,6 +50,7 @@ which Zoomer saves next to the recording. Zoomer never connects out to them.
 | `node index.js status` | Counts, plus every download or transcription that is not done, with its last error |
 | `node index.js retry <id>` | Re-queue a failed download or transcription (stop the running instance first) |
 | `node index.js init` | Create an empty database (fresh installs) |
+| `node index.js transcribe-backlog [--limit N] [--dry-run] [--verbose]` | Queue transcription for recordings that have none yet (stop the running instance first) |
 | `npm test` | Tests; fake Zoom and fake worker, no network |
 
 ## Configuration
@@ -118,6 +119,23 @@ All calls except `/health` need `Authorization: Bearer <one of api.tokens>`.
 Put HTTPS in front with a reverse proxy if workers connect over the internet.
 Any program that speaks the protocol can be a worker. The full contract is in
 [docs/WORKER_PROTOCOL.md](docs/WORKER_PROTOCOL.md).
+
+### Never transcribing twice
+
+A recording is not queued, and a queued job is dropped when a worker claims it, if
+a transcript already exists next to it. Zoomer's own output (`transcription.pathTemplate`)
+always counts; add the names other tools use with `transcription.skipIfExists`, e.g.
+`["transcription_*.txt", "{name}.*.txt"]`, and list anything another tool is still
+working on in `transcription.skipListFile` (one file or folder per line). Results never
+overwrite an existing file; a free name such as `x.1.txt` is used instead.
+
+### Older recordings
+
+`node index.js transcribe-backlog --dry-run --verbose` lists recordings with no
+transcript yet (newest first) and what it skips and why. Without `--dry-run` it queues
+them (`--limit N`, default 10). Besides recordings Zoomer downloaded, it scans
+`transcription.backlog.dirs` (default `download.dir`) for media files, filtered by the
+`backlog.include` / `backlog.exclude` globs. Stop a running Zoomer before queueing.
 
 ## Data
 
