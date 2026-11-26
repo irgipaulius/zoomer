@@ -8,6 +8,7 @@ import { createLogger } from "./src/log.js";
 import { openDb, initDb } from "./src/store.js";
 import { createZoomClient } from "./src/zoom.js";
 import { createRunner } from "./src/runner.js";
+import { createApi } from "./src/api.js";
 
 const USAGE = `usage: node index.js [command] [--once]
   run [--once]   (default) run on the configured schedule; --once = one pass, then exit (for system cron)
@@ -77,6 +78,8 @@ async function main(argv) {
     return release();
   }
 
+  const server = cfg.api.enabled && createApi({ cfg, db, log }).listen(cfg.api.port, cfg.api.host);
+  if (server) log.info(`worker API on http://${cfg.api.host}:${cfg.api.port}${cfg.api.basePath}`);
   const job = Cron(cfg.schedule.cron, { timezone: cfg.schedule.timezone || undefined, protect: true }, runner.tick);
   log.info(`zoomer started, schedule "${cfg.schedule.cron}", next run ${job.next().toISOString()}`);
   if (cfg.schedule.runOnStart) runner.tick();
@@ -85,6 +88,7 @@ async function main(argv) {
     log.info(`${signal}: stopping (unfinished downloads restart on the next start)`);
     job.stop();
     runner.queue.clear();
+    if (server) server.close();
     db.save();
     release();
     process.exit(0);
