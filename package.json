@@ -1,12 +1,12 @@
 {
   "name": "zoomer",
   "type": "module",
-  "version": "1.0.0",
-  "description": "Zoom Bardaciokas",
+  "version": "2.0.0",
+  "description": "Self-hosted Zoom cloud recording downloader with optional pluggable transcription",
   "main": "index.js",
   "scripts": {
     "start": "node ./index.js",
-    "s": "nodemon ./index.js"
+    "test": "node test/run.js"
   },
   "repository": {
     "type": "git",
@@ -19,17 +19,17 @@
   },
   "homepage": "https://github.com/irgipaulius/zoomer#readme",
   "dependencies": {
+    "croner": "^5.7.0",
     "dayjs": "^1.10.4",
-    "dotenv": "^8.2.0",
-    "fs": "0.0.1-security",
+    "express": "^4.22.3",
     "got": "^11.8.2",
-    "jsonwebtoken": "^8.3.0",
-    "node-fetch": "^2.6.1",
-    "path": "^0.12.7",
-    "stream": "0.0.2",
-    "util": "^0.12.3"
+    "p-queue": "^6.6.2",
+    "p-retry": "^4.6.2",
+    "picomatch": "^2.3.2",
+    "proper-lockfile": "^4.1.2",
+    "write-file-atomic": "^3.0.3"
   },
-  "devDependencies": {
-    "nodemon": "^2.0.7"
+  "engines": {
+    "node": ">=15.14"
   }
 }
