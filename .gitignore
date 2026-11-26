@@ -106,4 +106,7 @@ dist
 # TernJS port file
 .tern-port
 
-config.js
+# local configuration (secrets) and runtime data
+/config.js
+/database/recordingsList.json
+/database/recordingsList.json.*
